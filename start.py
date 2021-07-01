@@ -582,4 +582,4 @@ async def open_account(message):
     with open("data/bank.json","w") as z:
         json.dump(bank,z)
 
-bot.run("ODU4NTQ4OTIyNzcxNzAxNzcw.YNfv_g.HBBKEjbAdxCKOFS121s5m_vl9Sw")
+bot.run("insert token")
