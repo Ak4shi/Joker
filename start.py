@@ -14,7 +14,7 @@ from PIL import Image
 import random
 from discord_components import DiscordComponents
 from paginate import paginate
-
+import get
 
 devs = []
 
@@ -548,6 +548,74 @@ async def box(ctx,action=None,type=None):
         await ctx.send(embed=embed)
 
 @bot.command()
+async def deck(ctx,id=None):
+    pages = []
+    with open("data/bank.json","r") as f:
+        bank = json.load(f)
+    if id != int:
+        comment = ""
+        it = "null"
+        found = False
+        try:
+            int(id)
+        except:
+            return await ctx.send("Please only use ids to add to your deck")
+
+        classer = get.getclass(int(id))
+        if bank[str(ctx.author.id)]["deck"][classer] == str(id):
+            bank[str(ctx.author.id)]["deck"][classer] = "None set yet use `jk!deck id` to add/remove a card"
+            comment = "removed"
+        else:
+            bank[str(ctx.author.id)]["deck"][classer] = str(id)
+            comment = "added"
+        with open("data/bank.json","w") as z:
+            json.dump(bank,z)
+        return await ctx.send(f"Successfully {comment} `{id}` from deck")
+   else:
+        loadring = await ctx.send("loading...")
+        if id != None:
+            user = id
+        else:
+            user = ctx.author
+        embed = discord.Embed(title=f"{user.name}'s deck",description=f"Your deck is used in battle, the order of combat from 1st to last:\n1. Beserker\n2. Rider\n3. Lancer\n4. Saber\n5. Archer\n6. Assassin\n7. Caster",color=ctx.author.color)
+        pages.append(embed)
+        for item in bank[str(user.id)]["deck"]:
+            ids = bank[str(user.id)]["deck"][item]
+            itemz = requests.request("POST",f'https://www.animecharactersdatabase.com/api_series_characters.php?character_id={ids}',headers=headers)
+            print(itemz.text)
+            itemz = itemz.json()
+            image = itemz["character_image"]
+            name = itemz["name"]
+            idx = itemz["id"]
+            gender = itemz["gender"]
+            desc = itemz["desc"]
+            collection = itemz["origin"]
+            card = itemz["id"]
+            cost = "not found."
+            if int(card) < 10:
+                cost = int(card)*1000
+            elif int(card) < 100:
+                cost = int(card)*1000
+            elif int(card) < 1000:
+                cost = int(card)*100
+            elif int(card) < 10000:
+                cost = int(card)*10
+            elif int(card) < 100000:
+                cost = int(card)
+            else:
+                cost = int(card)
+            classer = get.getclass(int(idx))
+            att = get.gettack(int(idx))
+            hp = get.gethp(int(idx))
+            embed = discord.Embed(title=f"{item}",description=f"**Id:** `{id}`\n**Gender:** {gender}\n**collection:** {collection}\n**description:** *{desc}*\n**Cost:** `{cost}`\n**Class:** {classer}\n**Attack:** `{att}`\n**Health:** `{hp}`",color=ctx.author.color)
+            embed.set_image(url=image)
+            pages.append(embed)
+            await loadring.edit(f"{ctx.author.mention} loaded!")
+            await paginate(bot,ctx,pages,loadring)
+            
+        
+        
+@bot.command()
 async def help(ctx, message=None):
     # THis should DM the user that requested it.
     embed = discord.Embed(color=ctx.author.color)
@@ -565,12 +633,23 @@ async def help(ctx, message=None):
 
 @bot.listen("on_message")
 async def open_account(message):
-    with open("data/bank.json","r") as f:
-        bank = json.load(f)
+
     if str(message.author.id) not in bank:
         bank[str(message.author.id)] = {}
         bank[str(message.author.id)]["balance"] = 0
         bank[str(message.author.id)]["cards"] = {}
+        # Deck
+        try:
+            test = bank[str(message.author.id)]["deck"]
+        except KeyError:
+            bank[str(message.author.id)]["deck"] = {}
+            bank[str(message.author.id)]["deck"]["beserker"] = "None set yet use `jk!deck id` to add/remove a card"
+            bank[str(message.author.id)]["deck"]["rider"] = "None set yet use `jk!deck id` to add/remove a card"
+            bank[str(message.author.id)]["deck"]["lancer"] = "None set yet use `jk!deck id` to add/remove a card"
+            bank[str(message.author.id)]["deck"]["saber"] = "None set yet use `jk!deck id` to add/remove a card"
+            bank[str(message.author.id)]["deck"]["archer"] = "None set yet use `jk!deck id` to add/remove a card"
+            bank[str(message.author.id)]["deck"]["assassin"] = "None set yet use `jk!deck id` to add/remove a card"
+            bank[str(message.author.id)]["deck"]["caster"] = "None set yet use `jk!deck id` to add/remove a card"
     """
     with open("data/collections.json","r") as k:
         cel = json.load(k)
