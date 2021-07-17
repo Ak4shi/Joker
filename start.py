@@ -1,4 +1,5 @@
 # Discord Card Wars Bot
+import sys
 import os
 import discord
 from discord.ext import commands
@@ -17,12 +18,14 @@ from paginate import paginate
 import get
 from discord.ext.tasks import loop
 from server import keep_alive
-
+execk = 0
 
 @loop(minutes=10)
 async def git_pull():
-    os.system("git pull")
-
+		os.system("git pull")
+		if execk != 0:
+			os.execv(sys.executable, ['python'] + sys.argv)
+		execk += 1
 devs = []
 
 
@@ -627,6 +630,7 @@ async def deck(ctx,id=None):
         await asyncio.sleep(1)
         await loadring.edit(f"{ctx.author.mention} loaded!")
         await paginate(bot,ctx,pages,loadring)
+
 
 
 
