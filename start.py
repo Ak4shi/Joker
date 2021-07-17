@@ -16,6 +16,8 @@ from discord_components import DiscordComponents
 from paginate import paginate
 import get
 
+
+
 devs = []
 
 
@@ -212,20 +214,10 @@ async def animeview(ctx,*,query=None):
                 cost = int(card)
             else:
                 cost = int(card)
-            embed = discord.Embed(title=f"{name}'s card",description=f"**Id:** `{id}`\n**Gender:** {gender}\n**collection:** {collection}\n**description:** *{desc}*\n**Cost:** `{cost}`",color=ctx.author.color)
-            """
-            image_directory = "frame.png"
-            img = Image.open("{}".format(image_directory))
-            pfp = Image.open(requests.get(image, stream=True).raw)
-            pfp = pfp.resize((350, 479))
-
-            img.paste(pfp, (13, 27))
-
-            image_save_as = "temp/frame_complete.png"
-            img.save("{}".format(image_save_as))
-            file = discord.File("temp/frame_complete.png", filename="frame_complete.png")
-            embed.set_image(url="attachment://frame_complete.png")
-            """
+            classer = get.getclass(int(id))
+            att = get.getattack(int(id))
+            hp = get.gethp(int(id))
+            embed = discord.Embed(title=f"{name}",description=f"**Id:** `{id}`\n**Gender:** {gender}\n**collection:** {collection}\n**description:** *{desc}*\n**Cost:** `{cost}`\n**Class:** {classer}\n**Attack:** `{att}`\n**Health:** `{hp}`",color=ctx.author.color)
             embed.set_image(url=image)
             pages.append(embed)
         await paginate(bot,ctx,pages,loadring)
@@ -377,7 +369,10 @@ async def animeinventory(ctx,user:discord.Member=None):
                         cost = int(card)
                     else:
                         cost = int(card)
-                    embed = discord.Embed(title=f"{name}'s card",description=f"**Id:** `{id}`\n**Gender:** {gender}\n**collection:** {collection}\n**description:** *{desc}*\n**Cost:** `{cost}`",color=ctx.author.color)
+                    classer = get.getclass(int(id))
+                    att = get.getattack(int(id))
+                    hp = get.gethp(int(id))
+                    embed = discord.Embed(title=f"{name}",description=f"**Id:** `{id}`\n**Gender:** {gender}\n**collection:** {collection}\n**description:** *{desc}*\n**Cost:** `{cost}`\n**Class:** {classer}\n**Attack:** `{att}`\n**Health:** `{hp}`",color=ctx.author.color)
                     embed.set_image(url=image)
 
                     if id not in ids:
@@ -549,10 +544,19 @@ async def box(ctx,action=None,type=None):
 
 @bot.command()
 async def deck(ctx,id=None):
+    inte = True
+    headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36',
+    'From': 'cool5tarxv@gmail.com'  # This is another valid field
+    }
     pages = []
     with open("data/bank.json","r") as f:
         bank = json.load(f)
-    if id != int:
+    try:
+        int(id)
+    except:
+        inte = False
+    if inte != False:
         comment = ""
         it = "null"
         found = False
@@ -571,7 +575,7 @@ async def deck(ctx,id=None):
         with open("data/bank.json","w") as z:
             json.dump(bank,z)
         return await ctx.send(f"Successfully {comment} `{id}` from deck")
-   else:
+    else:
         loadring = await ctx.send("loading...")
         if id != None:
             user = id
@@ -580,41 +584,47 @@ async def deck(ctx,id=None):
         embed = discord.Embed(title=f"{user.name}'s deck",description=f"Your deck is used in battle, the order of combat from 1st to last:\n1. Beserker\n2. Rider\n3. Lancer\n4. Saber\n5. Archer\n6. Assassin\n7. Caster",color=ctx.author.color)
         pages.append(embed)
         for item in bank[str(user.id)]["deck"]:
+            print(item)
             ids = bank[str(user.id)]["deck"][item]
-            itemz = requests.request("POST",f'https://www.animecharactersdatabase.com/api_series_characters.php?character_id={ids}',headers=headers)
-            print(itemz.text)
-            itemz = itemz.json()
-            image = itemz["character_image"]
-            name = itemz["name"]
-            idx = itemz["id"]
-            gender = itemz["gender"]
-            desc = itemz["desc"]
-            collection = itemz["origin"]
-            card = itemz["id"]
-            cost = "not found."
-            if int(card) < 10:
-                cost = int(card)*1000
-            elif int(card) < 100:
-                cost = int(card)*1000
-            elif int(card) < 1000:
-                cost = int(card)*100
-            elif int(card) < 10000:
-                cost = int(card)*10
-            elif int(card) < 100000:
-                cost = int(card)
+            if ids == "None set yet use `jk!deck id` to add/remove a card":
+                embed = discord.Embed(title=f"{item}",description="None set yet use `jk!deck id` to add/remove a card",color=ctx.author.color)
+                pages.append(embed)
             else:
-                cost = int(card)
-            classer = get.getclass(int(idx))
-            att = get.gettack(int(idx))
-            hp = get.gethp(int(idx))
-            embed = discord.Embed(title=f"{item}",description=f"**Id:** `{id}`\n**Gender:** {gender}\n**collection:** {collection}\n**description:** *{desc}*\n**Cost:** `{cost}`\n**Class:** {classer}\n**Attack:** `{att}`\n**Health:** `{hp}`",color=ctx.author.color)
-            embed.set_image(url=image)
-            pages.append(embed)
-            await loadring.edit(f"{ctx.author.mention} loaded!")
-            await paginate(bot,ctx,pages,loadring)
-            
-        
-        
+                itemz = requests.request("POST",f'https://www.animecharactersdatabase.com/api_series_characters.php?character_id={ids}',headers=headers)
+                print(itemz.text)
+                itemz = itemz.json()
+                image = itemz["character_image"]
+                name = itemz["name"]
+                idx = itemz["id"]
+                gender = itemz["gender"]
+                desc = itemz["desc"]
+                collection = itemz["origin"]
+                card = itemz["id"]
+                cost = "not found."
+                if int(card) < 10:
+                    cost = int(card)*1000
+                elif int(card) < 100:
+                    cost = int(card)*1000
+                elif int(card) < 1000:
+                    cost = int(card)*100
+                elif int(card) < 10000:
+                    cost = int(card)*10
+                elif int(card) < 100000:
+                    cost = int(card)
+                else:
+                    cost = int(card)
+                classer = get.getclass(int(idx))
+                att = get.getattack(int(idx))
+                hp = get.gethp(int(idx))
+                embed = discord.Embed(title=f"{item}",description=f"**Id:** `{id}`\n**Gender:** {gender}\n**collection:** {collection}\n**description:** *{desc}*\n**Cost:** `{cost}`\n**Class:** {classer}\n**Attack:** `{att}`\n**Health:** `{hp}`",color=ctx.author.color)
+                embed.set_image(url=image)
+                pages.append(embed)
+        await asyncio.sleep(1)
+        await loadring.edit(f"{ctx.author.mention} loaded!")
+        await paginate(bot,ctx,pages,loadring)
+
+
+
 @bot.command()
 async def help(ctx, message=None):
     # THis should DM the user that requested it.
@@ -633,23 +643,21 @@ async def help(ctx, message=None):
 
 @bot.listen("on_message")
 async def open_account(message):
-
+    with open("data/bank.json","r") as f:
+        bank = json.load(f)
     if str(message.author.id) not in bank:
         bank[str(message.author.id)] = {}
         bank[str(message.author.id)]["balance"] = 0
         bank[str(message.author.id)]["cards"] = {}
         # Deck
-        try:
-            test = bank[str(message.author.id)]["deck"]
-        except KeyError:
-            bank[str(message.author.id)]["deck"] = {}
-            bank[str(message.author.id)]["deck"]["beserker"] = "None set yet use `jk!deck id` to add/remove a card"
-            bank[str(message.author.id)]["deck"]["rider"] = "None set yet use `jk!deck id` to add/remove a card"
-            bank[str(message.author.id)]["deck"]["lancer"] = "None set yet use `jk!deck id` to add/remove a card"
-            bank[str(message.author.id)]["deck"]["saber"] = "None set yet use `jk!deck id` to add/remove a card"
-            bank[str(message.author.id)]["deck"]["archer"] = "None set yet use `jk!deck id` to add/remove a card"
-            bank[str(message.author.id)]["deck"]["assassin"] = "None set yet use `jk!deck id` to add/remove a card"
-            bank[str(message.author.id)]["deck"]["caster"] = "None set yet use `jk!deck id` to add/remove a card"
+        bank[str(message.author.id)]["deck"] = {}
+        bank[str(message.author.id)]["deck"]["beserker"] = "None set yet use `jk!deck id` to add/remove a card"
+        bank[str(message.author.id)]["deck"]["rider"] = "None set yet use `jk!deck id` to add/remove a card"
+        bank[str(message.author.id)]["deck"]["lancer"] = "None set yet use `jk!deck id` to add/remove a card"
+        bank[str(message.author.id)]["deck"]["saber"] = "None set yet use `jk!deck id` to add/remove a card"
+        bank[str(message.author.id)]["deck"]["archer"] = "None set yet use `jk!deck id` to add/remove a card"
+        bank[str(message.author.id)]["deck"]["assassin"] = "None set yet use `jk!deck id` to add/remove a card"
+        bank[str(message.author.id)]["deck"]["caster"] = "None set yet use `jk!deck id` to add/remove a card"
     """
     with open("data/collections.json","r") as k:
         cel = json.load(k)
@@ -661,4 +669,6 @@ async def open_account(message):
     with open("data/bank.json","w") as z:
         json.dump(bank,z)
 
-bot.run("insert token")
+with open("config.json","r") as x:
+    cfg = json.load(x)
+bot.run(cfg["token"])

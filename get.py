@@ -30,7 +30,7 @@ def getattack(number:int):
     number += 123
     number = number*1.5
   while number > 150:
-    number = sqrt(number)
+    number = number ** (1./3.)
     number = round(number)
   return number
 
