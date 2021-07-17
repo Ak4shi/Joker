@@ -635,7 +635,7 @@ async def help(ctx, message=None):
     # THis should DM the user that requested it.
     embed = discord.Embed(color=ctx.author.color)
     embed.set_author(name="Welcome to Card Wars!")
-    embed.add_field(name="Anime Pack:", value="`jk!aview [card name]` shows details of a card. \n `jk!aimage [card name]` shows just the image of a card.\n`jk!acview` View a collection and their cards\n`jk!box` get a chest and go for a random card\n `jk!trivia` guess right for some 💳\n`jk!balance` check your balance left\n `jk!ainv` check your inventory", inline=True)
+    embed.add_field(name="Anime Pack:", value="`jk!aview [card name]` shows details of a card. \n `jk!aimage [card name]` shows just the image of a card.\n`jk!acview` View a collection and their cards\n`jk!box` get a chest and go for a random card\n `jk!trivia` guess right for some 💳\n`jk!balance` check your balance left\n `jk!ainv` check your inventory\n `jk!deck` view your deck or add a card with `jk!deck <id>`", inline=True)
     embed.add_field(name="Mythical Pack:", value="`jk!mview [card name]` shows details of a card. \n `jk!mimage [card name]` shows just the image of a card.", inline=False)
     embed.add_field(name="Invite",value="`jk!invite` invite this bot to your server",inline=False)
     embed.set_footer(text="Made by Kaneki#9876, Card Wars.")
