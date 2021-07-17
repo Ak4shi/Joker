@@ -144,6 +144,8 @@ async def mythicview(ctx, *, arg):
 
 @bot.command(aliases=["mimage"])
 async def mythicimage(ctx, *, arg):
+    if ctx.author.id == 746904488396324864:
+        return await ctx.send("Ee")
     with open('./cards.csv') as cfile:
         csv_file = csv.reader(cfile, delimiter=',',quotechar='"')
         # Find card and return value
