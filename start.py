@@ -15,8 +15,12 @@ import random
 from discord_components import DiscordComponents
 from paginate import paginate
 import get
+from discord.ext.tasks import loop
 
 
+@loop(minutes=10)
+def git_pull():
+    os.system("git pull")
 
 devs = []
 
@@ -671,4 +675,5 @@ async def open_account(message):
 
 with open("config.json","r") as x:
     cfg = json.load(x)
+git_pull.start()
 bot.run(cfg["token"])
