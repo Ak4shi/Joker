@@ -20,7 +20,7 @@ from discord.ext.tasks import loop
 from server import keep_alive
 execk = 0
 
-@loop(minutes=10)
+@loop(hours=1)
 async def git_pull():
 		os.system("git pull")
 		if execk != 0:
