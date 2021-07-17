@@ -494,7 +494,7 @@ async def trivia(ctx):
         return await ctx.send(f"You didn't answer, the answer was `{correct}`.")
     print(answergiven)
     if answergiven == correct:
-        injected = random.randint(1,10000)
+        injected = random.randint(1,5000)
         await ctx.send(f"you won `{injected}` 💳")
         bank[str(ctx.author.id)]["balance"] += injected
         with open("data/bank.json","w") as z:
