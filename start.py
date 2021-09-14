@@ -194,8 +194,24 @@ async def animeview(ctx,*,query=None):
         embed = discord.Embed(title="Welcome to the Anime Pack",description="For a targetted user please use their id or enjoy all results for that name",color=ctx.author.color)
         pages.append(embed)
         for item in anime["search_results"]:
-            image = item["character_image"]
             name = item["name"]
+            e = name.replace(" ","-")
+            amtx = 1
+            image = "."
+            e = e.lower()
+            print(e)
+            ex = "."
+            while ex.startswith("""<?xml version="1.0" encoding="UTF-8"?>""") == False:
+                if ex.startswith("""<?xml version="1.0" encoding="UTF-8"?>""") == False:
+                    image = requests.request("GET",f"https://d2l56h9h5tj8ue.cloudfront.net/images/cards/{e}-{amtx}.jpg")
+                    ex = image.text
+                    if ex.startswith("""<?xml version="1.0" encoding="UTF-8"?>""") == False and amt == 1:
+                        amtx += 1
+            if amtx != 1:
+                image = f"https://d2l56h9h5tj8ue.cloudfront.net/images/cards/{e}-1.jpg"
+            else:
+                image = item["character_image"]
+            print(image)
             id = item["id"]
             gender = item["gender"]
             desc = item["desc"]
@@ -217,7 +233,7 @@ async def animeview(ctx,*,query=None):
             classer = get.getclass(int(id))
             att = get.getattack(int(id))
             hp = get.gethp(int(id))
-            embed = discord.Embed(title=f"{name}",description=f"**Id:** `{id}`\n**Gender:** {gender}\n**collection:** {collection}\n**description:** *{desc}*\n**Cost:** `{cost}`\n**Class:** {classer}\n**Attack:** `{att}`\n**Health:** `{hp}`",color=ctx.author.color)
+            embed = discord.Embed(title=f"{name}",description=f"**Id:** `{id}`\n**Gender:** {gender}\n**Editions:** {amtx}\n**collection:** {collection}\n**description:** *{desc}*\n**Cost:** `{cost}`\n**Class:** {classer}\n**Attack:** `{att}`\n**Health:** `{hp}`",color=ctx.author.color)
             embed.set_image(url=image)
             pages.append(embed)
         await paginate(bot,ctx,pages,loadring)
@@ -349,8 +365,24 @@ async def animeinventory(ctx,user:discord.Member=None):
                     itemz = requests.request("POST",f'https://www.animecharactersdatabase.com/api_series_characters.php?character_id={id}',headers=headers)
                     print(itemz.text)
                     itemz = itemz.json()
-                    image = itemz["character_image"]
                     name = itemz["name"]
+                    e = name.replace(" ","-")
+                    amtx = 1
+                    image = "."
+                    e = e.lower()
+                    print(e)
+                    ex = "."
+                    while ex.startswith("""<?xml version="1.0" encoding="UTF-8"?>""") == False:
+                        if ex.startswith("""<?xml version="1.0" encoding="UTF-8"?>""") == False:
+                            image = requests.request("GET",f"https://d2l56h9h5tj8ue.cloudfront.net/images/cards/{e}-{amtx}.jpg")
+                            ex = image.text
+                            if ex.startswith("""<?xml version="1.0" encoding="UTF-8"?>""") == False and amt == 1:
+                                amtx += 1
+                    if amtx != 1:
+                        image = f"https://d2l56h9h5tj8ue.cloudfront.net/images/cards/{e}-1.jpg"
+                    else:
+                        image = itemz["character_image"]
+                    print(image)
                     id = itemz["id"]
                     gender = itemz["gender"]
                     desc = itemz["desc"]
@@ -372,7 +404,7 @@ async def animeinventory(ctx,user:discord.Member=None):
                     classer = get.getclass(int(id))
                     att = get.getattack(int(id))
                     hp = get.gethp(int(id))
-                    embed = discord.Embed(title=f"{name}",description=f"**Id:** `{id}`\n**Gender:** {gender}\n**collection:** {collection}\n**description:** *{desc}*\n**Cost:** `{cost}`\n**Class:** {classer}\n**Attack:** `{att}`\n**Health:** `{hp}`",color=ctx.author.color)
+                    embed = discord.Embed(title=f"{name}",description=f"**Id:** `{id}`\n**Gender:** {gender}\n**Editions:** {amtx}\n**collection:** {collection}\n**description:** *{desc}*\n**Cost:** `{cost}`\n**Class:** {classer}\n**Attack:** `{att}`\n**Health:** `{hp}`",color=ctx.author.color)
                     embed.set_image(url=image)
 
                     if id not in ids:
@@ -429,8 +461,24 @@ async def buy(ctx,card):
     with open("data/bank.json","w") as z:
         json.dump(bank,z)
     name = anime["name"]
+    e = name.replace(" ","-")
+    amtx = 1
+    image = "."
+    e = e.lower()
+    print(e)
+    ex = "."
+    while ex.startswith("""<?xml version="1.0" encoding="UTF-8"?>""") == False:
+        if ex.startswith("""<?xml version="1.0" encoding="UTF-8"?>""") == False:
+            image = requests.request("GET",f"https://d2l56h9h5tj8ue.cloudfront.net/images/cards/{e}-{amtx}.jpg")
+            ex = image.text
+            if ex.startswith("""<?xml version="1.0" encoding="UTF-8"?>""") == False and amt == 1:
+                amtx += 1
+    if amtx != 1:
+        image = f"https://d2l56h9h5tj8ue.cloudfront.net/images/cards/{e}-1.jpg"
+    else:
+        image = anime["character_image"]
     embed = discord.Embed(title=f"successfully bought {name}",description=f"You bought {name} from {collection}",color=discord.Color.green())
-    embed.set_image(url=anime["character_image"])
+    embed.set_image(url=image)
     await ctx.send(embed=embed)
 @bot.command(aliases=["bal"])
 async def balance(ctx,user:discord.Member=None):
