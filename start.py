@@ -17,7 +17,8 @@ from discord_components import DiscordComponents
 from paginate import paginate
 import get
 from discord.ext.tasks import loop
-from server import keep_alive
+#from server import keep_alive
+from pretty_help import PrettyHelp
 execk = 0
 
 @loop(hours=1)
@@ -37,8 +38,7 @@ def log_write(text):
 
 log_write("Starting BOT!!!")
 
-bot = commands.AutoShardedBot(command_prefix='jk!')
-bot.remove_command('help')
+bot = commands.AutoShardedBot(command_prefix='jk!',help_command=PrettyHelp())
 
 @bot.event
 async def on_ready():
@@ -692,25 +692,41 @@ async def fight(ctx,user:discord.Member=None):
 			embed.set_image(url="https://steamuserimages-a.akamaihd.net/ugc/1743429419938967655/FE544A0351697618062E05713EC1CFA482C595E1/?imw=268&imh=268&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true")
 			embed.add_field(name="loading",value="Fetching cards...")
 			await ctx.send(embed=embed)
-			
+
 	except asyncio.TimeoutError:
 		return await ctx.send("Well maybe next time.")
 
 
 @bot.command()
-async def help(ctx, message=None):
-    embed = discord.Embed(color=ctx.author.color)
-    embed.set_author(name="Welcome to Card Wars!")
-    embed.add_field(name="Anime Pack:", value="`jk!aview [card name]` shows details of a card. \n `jk!aimage [card name]` shows just the image of a card.\n`jk!acview` View a collection and their cards\n`jk!box` get a chest and go for a random card\n `jk!trivia` guess right for some 💳\n`jk!balance` check your balance left\n `jk!ainv` check your inventory\n `jk!deck` view your deck or add a card with `jk!deck [id]`", inline=True)
-    embed.add_field(name="Mythical Pack:", value="`jk!mview [card name]` shows details of a card. \n `jk!mimage [card name]` shows just the image of a card.", inline=False)
-    embed.add_field(name="Invite",value="`jk!invite` invite this bot to your server",inline=False)
-    embed.set_footer(text="Made by Kaneki#9876, Card Wars.")
-    await ctx.send(embed=embed)
-    log_write("Sent help message to {}.".format(ctx.message.author))
+async def public(action,action1=None,*,args):
+    pub = funcs.getpub()
+    if str(ctx.author.id) not in pubs["users"]:
+        funcs.openpub(ctx.author)
+    if action == "view":
+        if action1 == None:
+            action1 = ctx.author.id
+        if action1 not in pubs["users"]:
+            await ctx.send("User not found! Please view by user id or use the search function.")
+        # loading data to embed!
+        with open("data/bank.json","r") as f:
+            bank = json.load(f)
+        avatar = pub["users"][str(action1)]["avatar"]
+        desc = pub["users"][str(action1)]["description"]
+        name = pub["users"][str(action1)]["name"]
+        bal = bank[str(action1)]["balance"]
+        amt = 0
+        for item in bank[str(action1)]["cards"]:
+            amt += 1
+        embed = discord.Embed(title=f"{name}'s Profile!",description="",color=ctx.author.color)
+        embed.set_image(url=avatar)
+        embed.add_field(name="Description:",value=f"Status: {desc}\nBalance: {bal}\nCollections: {amt}",inline=False)
+        await ctx.send(embed=embed)
+    #if action == ""
 
-#@bot.command()
-#async def cards(ctx):
-    #for file in listdir('images/'):
+
+
+
+
 
 @bot.listen("on_message")
 async def open_account(message):
@@ -739,9 +755,11 @@ async def open_account(message):
     """
     with open("data/bank.json","w") as z:
         json.dump(bank,z)
+    pub = funcs.getpub()
+    if str(message.author.id) not in pub:
+        funcs.openpub(message.author)
 
 with open("config.json","r") as x:
     cfg = json.load(x)
-git_pull.start()
-keep_alive()
+#keep_alive()
 bot.run(cfg["token"])
