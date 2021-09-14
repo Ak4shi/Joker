@@ -1,4 +1,5 @@
 # Discord Card Wars Bot
+import sys
 import os
 import discord
 from discord.ext import commands
@@ -15,9 +16,16 @@ import random
 from discord_components import DiscordComponents
 from paginate import paginate
 import get
+from discord.ext.tasks import loop
+from server import keep_alive
+execk = 0
 
-
-
+@loop(hours=1)
+async def git_pull():
+		os.system("git pull")
+		if execk != 0:
+			os.execv(sys.executable, ['python'] + sys.argv)
+		execk += 1
 devs = []
 
 
@@ -136,6 +144,8 @@ async def mythicview(ctx, *, arg):
 
 @bot.command(aliases=["mimage"])
 async def mythicimage(ctx, *, arg):
+    if ctx.author.id == 746904488396324864:
+        return await ctx.send("Ee")
     with open('./cards.csv') as cfile:
         csv_file = csv.reader(cfile, delimiter=',',quotechar='"')
         # Find card and return value
@@ -534,7 +544,7 @@ async def trivia(ctx):
         return await ctx.send(f"You didn't answer, the answer was `{correct}`.")
     print(answergiven)
     if answergiven == correct:
-        injected = random.randint(1,10000)
+        injected = random.randint(1,5000)
         await ctx.send(f"you won `{injected}` 💳")
         bank[str(ctx.author.id)]["balance"] += injected
         with open("data/bank.json","w") as z:
@@ -671,14 +681,27 @@ async def deck(ctx,id=None):
         await loadring.edit(f"{ctx.author.mention} loaded!")
         await paginate(bot,ctx,pages,loadring)
 
+@bot.command()
+async def fight(ctx,user:discord.Member=None):
+	embed = discord.Embed(title="Fight time!",description=f"{ctx.author.name} has challenged {user.name} to a fight.\n Type `accept` to start the fight.",color=ctx.author.color)
+	await ctx.send(embed=embed)
+	try:
+		choice = await bot.wait_for("message", check = lambda msg: msg.author == user, timeout = 30)
+		if choice.content.startswith("accept"):
+			embed = discord.Embed(title="Fight time!",description=f"{ctx.author.name} has challenged {user.name} to a fight!",color=ctx.author.color)
+			embed.set_image(url="https://steamuserimages-a.akamaihd.net/ugc/1743429419938967655/FE544A0351697618062E05713EC1CFA482C595E1/?imw=268&imh=268&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true")
+			embed.add_field(name="loading",value="Fetching cards...")
+			await ctx.send(embed=embed)
+			
+	except asyncio.TimeoutError:
+		return await ctx.send("Well maybe next time.")
 
 
 @bot.command()
 async def help(ctx, message=None):
-    # THis should DM the user that requested it.
     embed = discord.Embed(color=ctx.author.color)
     embed.set_author(name="Welcome to Card Wars!")
-    embed.add_field(name="Anime Pack:", value="`jk!aview [card name]` shows details of a card. \n `jk!aimage [card name]` shows just the image of a card.\n`jk!acview` View a collection and their cards\n`jk!box` get a chest and go for a random card\n `jk!trivia` guess right for some 💳\n`jk!balance` check your balance left\n `jk!ainv` check your inventory", inline=True)
+    embed.add_field(name="Anime Pack:", value="`jk!aview [card name]` shows details of a card. \n `jk!aimage [card name]` shows just the image of a card.\n`jk!acview` View a collection and their cards\n`jk!box` get a chest and go for a random card\n `jk!trivia` guess right for some 💳\n`jk!balance` check your balance left\n `jk!ainv` check your inventory\n `jk!deck` view your deck or add a card with `jk!deck [id]`", inline=True)
     embed.add_field(name="Mythical Pack:", value="`jk!mview [card name]` shows details of a card. \n `jk!mimage [card name]` shows just the image of a card.", inline=False)
     embed.add_field(name="Invite",value="`jk!invite` invite this bot to your server",inline=False)
     embed.set_footer(text="Made by Kaneki#9876, Card Wars.")
@@ -719,4 +742,6 @@ async def open_account(message):
 
 with open("config.json","r") as x:
     cfg = json.load(x)
+git_pull.start()
+keep_alive()
 bot.run(cfg["token"])
