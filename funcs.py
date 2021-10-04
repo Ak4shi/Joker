@@ -1,6 +1,28 @@
 import asyncio
+import discord
 from discord_components import DiscordComponents, Button, ButtonStyle, InteractionType
 import json
+
+
+async def conf(bot,ctx,msg="Confirmed Successfully",title="Sucessfull!",one="✔️",two="❌"):
+    embed = discord.Embed(title=title,description=msg,color=ctx.author.color)
+    await ctx.send("Buttons!", components=[Button(label=one, custom_id="t",style=ButtonStyle.green),Button(label=two, custom_id="f",style=ButtonStyle.red)])
+    try:
+        interaction = await bot.wait_for(
+            "button_click", check=lambda inter: inter.custom_id in ["t","f"],
+            timeout = 10.0
+        )
+        if interaction.component.id == "t":
+            await interaction.respond(
+            type = InteractionType.UpdateMessage,
+            embed=embed)
+            return True
+        if interaction.component.id == "f":
+            return False
+    except asyncio.TimeoutError:
+        await ctx.send("You didn't respond in time.")
+        return "."
+
 
 def getpub():
     with open("data/public.json","r") as f:
@@ -24,6 +46,7 @@ def openpub(user):
     pub["users"][str(user.id)]["featured"]["3"] = "."
     pub["users"][str(user.id)]["featured"]["4"] = "."
     pub["users"][str(user.id)]["featured"]["5"] = "."
+    writepub(pub)
 
 async def get_main(ctx,editer,pages):
     if editer != None:

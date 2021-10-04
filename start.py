@@ -18,7 +18,7 @@ from paginate import paginate
 import get
 from discord.ext.tasks import loop
 #from server import keep_alive
-from pretty_help import PrettyHelp
+#from pretty_help import DefaultMenu, PrettyHelp
 execk = 0
 
 @loop(hours=1)
@@ -37,9 +37,11 @@ def log_write(text):
         log.write(all)
 
 log_write("Starting BOT!!!")
-
-bot = commands.AutoShardedBot(command_prefix='jk!',help_command=PrettyHelp())
-
+#
+bot = commands.AutoShardedBot(command_prefix='jk!')
+#bot.remove_command('help')
+#menu = DefaultMenu(page_left="⬅️", page_right="➡️", remove="❌", active_time=10)
+#bot.help_command=PrettyHelp(menu=menu)
 @bot.event
 async def on_ready():
     DiscordComponents(bot)
@@ -215,12 +217,13 @@ async def animeview(ctx,*,query=None):
                 if ex.startswith("""<?xml version="1.0" encoding="UTF-8"?>""") == False:
                     image = requests.request("GET",f"https://d2l56h9h5tj8ue.cloudfront.net/images/cards/{e}-{amtx}.jpg")
                     ex = image.text
-                    if ex.startswith("""<?xml version="1.0" encoding="UTF-8"?>""") == False and amt == 1:
+                    if ex.startswith("""<?xml version="1.0" encoding="UTF-8"?>""") == False:
                         amtx += 1
-            if amtx != 1:
-                image = f"https://d2l56h9h5tj8ue.cloudfront.net/images/cards/{e}-1.jpg"
-            else:
+            if ex.startswith("""<?xml version="1.0" encoding="UTF-8"?>""") == True and amtx == 1:
                 image = item["character_image"]
+
+            else:
+                image = f"https://d2l56h9h5tj8ue.cloudfront.net/images/cards/{e}-2.jpg"
             print(image)
             id = item["id"]
             gender = item["gender"]
@@ -389,7 +392,7 @@ async def animeinventory(ctx,user:discord.Member=None):
                             if ex.startswith("""<?xml version="1.0" encoding="UTF-8"?>""") == False and amt == 1:
                                 amtx += 1
                     if amtx != 1:
-                        image = f"https://d2l56h9h5tj8ue.cloudfront.net/images/cards/{e}-1.jpg"
+                        image = f"https://d2l56h9h5tj8ue.cloudfront.net/images/cards/{e}-2.jpg"
                     else:
                         image = itemz["character_image"]
                     print(image)
@@ -481,10 +484,10 @@ async def buy(ctx,card):
         if ex.startswith("""<?xml version="1.0" encoding="UTF-8"?>""") == False:
             image = requests.request("GET",f"https://d2l56h9h5tj8ue.cloudfront.net/images/cards/{e}-{amtx}.jpg")
             ex = image.text
-            if ex.startswith("""<?xml version="1.0" encoding="UTF-8"?>""") == False and amt == 1:
+            if ex.startswith("""<?xml version="1.0" encoding="UTF-8"?>""") == False and amtx == 1:
                 amtx += 1
     if amtx != 1:
-        image = f"https://d2l56h9h5tj8ue.cloudfront.net/images/cards/{e}-1.jpg"
+        image = f"https://d2l56h9h5tj8ue.cloudfront.net/images/cards/{e}-2.jpg"
     else:
         image = anime["character_image"]
     embed = discord.Embed(title=f"successfully bought {name}",description=f"You bought {name} from {collection}",color=discord.Color.green())
@@ -698,9 +701,9 @@ async def fight(ctx,user:discord.Member=None):
 
 
 @bot.command()
-async def public(action,action1=None,*,args):
+async def public(ctx,action,action1=None,*,args=None):
     pub = funcs.getpub()
-    if str(ctx.author.id) not in pubs["users"]:
+    if str(ctx.author.id) not in pub["users"]:
         funcs.openpub(ctx.author)
     if action == "view":
         if action1 == None:
@@ -721,7 +724,7 @@ async def public(action,action1=None,*,args):
         embed.set_image(url=avatar)
         embed.add_field(name="Description:",value=f"Status: {desc}\nBalance: {bal}\nCollections: {amt}",inline=False)
         await ctx.send(embed=embed)
-    #if action == ""
+    #if action == "":
 
 
 
@@ -730,6 +733,9 @@ async def public(action,action1=None,*,args):
 
 @bot.listen("on_message")
 async def open_account(message):
+    pub = funcs.getpub()
+    if str(message.author.id) not in pub:
+        funcs.openpub(message.author)
     with open("data/bank.json","r") as f:
         bank = json.load(f)
     if str(message.author.id) not in bank:
@@ -755,9 +761,7 @@ async def open_account(message):
     """
     with open("data/bank.json","w") as z:
         json.dump(bank,z)
-    pub = funcs.getpub()
-    if str(message.author.id) not in pub:
-        funcs.openpub(message.author)
+
 
 with open("config.json","r") as x:
     cfg = json.load(x)
